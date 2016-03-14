@@ -112,13 +112,16 @@ float snoise(vec3 v)
 uniform sampler2D texture1;
 
 uniform float time;
+uniform vec2 mouse;
 
 float rand(vec2 co){
-    return snoise(vec3(co * vec2(30, 20), time*.5)) *.5 + .5;
+    return snoise(vec3(co, time*.5)) *.5 + .5;
 }
 
 void main() {
-    vec2 pos = gl_FragCoord;//gl_TexCoord[0].st;
+    vec2 pos = gl_FragCoord.xy / vec2(40);
+    float dist = distance(gl_FragCoord.xy, mouse);
+    float str = .2+exp(-2 + dist * dist / -10000.);
     vec4 rand_color = vec4(rand(pos), rand(pos + vec2(100)), rand(pos + vec2(200)), 1);
-    gl_FragColor = texture2D(texture1, pos) * rand_color;
+    gl_FragColor = mix(gl_Color, rand_color, str);// * texture2D(texture1, gl_TexCoord[0].st);
 }
