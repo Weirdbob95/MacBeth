@@ -121,7 +121,7 @@ float rand(vec2 co){
 void main() {
     vec2 pos = gl_FragCoord.xy / vec2(40);
     float dist = distance(gl_FragCoord.xy, mouse);
-    float str = .2+exp(-2 + dist * dist / -10000.);
+    float str = .05+exp(-1. + dist * dist / -10000.);
     vec4 rand_color = vec4(rand(pos), rand(pos + vec2(100)), rand(pos + vec2(200)), 1);
     gl_FragColor = mix(gl_Color, rand_color, str);// * texture2D(texture1, gl_TexCoord[0].st);
 }

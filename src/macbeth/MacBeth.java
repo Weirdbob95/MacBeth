@@ -12,17 +12,20 @@ import graphics.data.Shader;
 import graphics.loading.SpriteContainer;
 import org.lwjgl.opengl.Display;
 import static util.Color4.BLACK;
+import static util.Color4.WHITE;
 import static util.Color4.gray;
 import util.Vec2;
 
 public class MacBeth {
+
+    public static Shader vision;
 
     public static void main(String[] args) {
         Core.init();
         Window2D.background = gray(.5);
         Core.render.bufferCount(Core.interval(1)).forEach(i -> Display.setTitle("FPS: " + i));
 
-        Shader vision = new Shader("default.vert", "vision.frag");
+        vision = new Shader("default.vert", "vision.frag");
         Core.time().forEach(t -> vision.setFloat("time", t));
         Core.render.onEvent(() -> vision.setVec2("mouse", Input.getMouseScreen().toFloatBuffer()));
 
@@ -46,10 +49,20 @@ public class MacBeth {
         return new LAE(macbeth -> {
             Signal<Vec2> position = Premade2D.makePosition(macbeth);
             Premade2D.makeVelocity(macbeth);
-            Premade2D.makeRotation(macbeth);
-            Premade2D.makeSpriteGraphics(macbeth, "box");
+            Signal<Double> rotation = Premade2D.makeRotation(macbeth);
+            Premade2D.makeSpriteGraphics(macbeth, "macbeth");
             Premade2D.makeWASDMovement(macbeth, 200);
+            macbeth.onUpdate(dt -> rotation.set(Input.getMouse().subtract(position.get()).direction() - Math.PI / 2));
             macbeth.onUpdate(dt -> Window2D.viewPos = Window2D.viewPos.interpolate(position.get(), Math.pow(.1, dt)));
+            Core.interval(.05).onEvent(() -> {
+                Vec2 pos = position.get();
+                double rot = rotation.get();
+                new LAE(foot -> {
+                    foot.add(Core.renderLayer(-1).onEvent(() -> Graphics2D.drawSprite(
+                            SpriteContainer.loadSprite("foot"), pos, new Vec2(1), rot, WHITE)));
+                    Core.timer(10, foot::destroy);
+                }).create();
+            });
         });
     }
 
@@ -62,7 +75,9 @@ public class MacBeth {
             Graphics2D.drawLine(UR, LL.withX(UR.x), BLACK, 8);
             Graphics2D.drawLine(LL, new Vec2(-100, -300), BLACK, 8);
             Graphics2D.drawLine(new Vec2(400, -300), new Vec2(100, -300), BLACK, 8);
-            Graphics2D.fillRect(LL, UR.subtract(LL), gray(.9));
+            vision.with(() -> {
+                Graphics2D.fillRect(LL, UR.subtract(LL), gray(.9));
+            });
         });
     }
 }
