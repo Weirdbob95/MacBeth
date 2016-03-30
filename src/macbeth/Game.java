@@ -1,7 +1,7 @@
 package macbeth;
 
-import engine.AbstractEntity.LAE;
 import engine.*;
+import engine.AbstractEntity.LAE;
 import examples.Premade2D;
 import graphics.Graphics2D;
 import graphics.Window2D;
@@ -15,9 +15,9 @@ import macbeth.Killable.Bloodstain;
 import macbeth.World.Room;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
+import util.*;
 import static util.Color4.BLACK;
 import static util.Color4.gray;
-import util.*;
 
 public class Game {
 
@@ -30,6 +30,9 @@ public class Game {
         Core.render.bufferCount(Core.interval(1)).forEach(i -> Display.setTitle("FPS: " + i));
 
         vision = new Shader("default.vert", "vision.frag");
+        vision.setFloat("value", .2);
+        vision.setFloat("mouseMult", 1);
+        vision.setFloat("size", 40);
         Core.time().forEach(t -> vision.setFloat("time", t));
         Core.render.onEvent(() -> vision.setVec2("mouse", Input.getMouseScreen().toFloatBuffer()));
         Core.render.onEvent(() -> vision.setVec2("offset", Window2D.viewPos.toFloatBuffer()));
@@ -201,18 +204,35 @@ public class Game {
         List<AbstractEntity> food = Arrays.asList(
                 world2.addObject(new LAE(pizza -> {
                     Premade2D.makePosition(pizza);
+                    Premade2D.makeVelocity(pizza);
                     pizza.get("position", Vec2.class).set(feast.LL.add(new Vec2(500, 500)));
                     Premade2D.makeSpriteGraphics(pizza, "pizza");
                 })),
                 world2.addObject(new LAE(fruit1 -> {
                     Premade2D.makePosition(fruit1);
+                    Premade2D.makeVelocity(fruit1);
                     fruit1.get("position", Vec2.class).set(feast.LL.add(new Vec2(500, 390)));
                     Premade2D.makeSpriteGraphics(fruit1, "fruit_bowl");
                 })),
                 world2.addObject(new LAE(fruit2 -> {
                     Premade2D.makePosition(fruit2);
+                    Premade2D.makeVelocity(fruit2);
                     fruit2.get("position", Vec2.class).set(feast.LL.add(new Vec2(500, 310)));
                     Premade2D.makeSpriteGraphics(fruit2, "fruit_bowl");
                 })));
+
+        world2.event(900, () -> {
+            Core.timer(2, () -> {
+                dreamValue = .2;
+                Person banquo = world2.addObject(new Person("banquo", feast.LL.add(new Vec2(500, 700)), Math.PI / 2));
+                banquo.shader = vision;
+                banquo.onUpdate(dt -> banquo.rotation.set(RegisteredEntity.get(Macbeth.class).get().position.get().subtract(banquo.position.get()).direction()));
+                food.forEach(e -> e.get("velocity", Vec2.class).set(Vec2.randomShell(500)));
+                Core.timer(5, () -> {
+                    banquo.destroy();
+                    dreamValue = 0;
+                });
+            });
+        });
     }
 }

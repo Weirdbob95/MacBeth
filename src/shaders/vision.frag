@@ -114,9 +114,9 @@ uniform sampler2D texture1;
 uniform float time;
 uniform vec2 mouse;
 uniform vec2 offset;
-uniform float value = .2;
-uniform float mouseMult = 1;
-uniform float size = 40;
+uniform float value;
+uniform float mouseMult;
+uniform float size;
 
 float rand(vec2 co){
     return snoise(vec3(co, time*.5)) *.5 + .5;
