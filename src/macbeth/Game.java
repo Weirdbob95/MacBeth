@@ -1,7 +1,7 @@
 package macbeth;
 
-import engine.*;
 import engine.AbstractEntity.LAE;
+import engine.*;
 import examples.Premade2D;
 import graphics.Graphics2D;
 import graphics.Window2D;
@@ -15,9 +15,9 @@ import macbeth.Killable.Bloodstain;
 import macbeth.World.Room;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import util.*;
 import static util.Color4.BLACK;
 import static util.Color4.gray;
+import util.*;
 
 public class Game {
 
@@ -68,11 +68,11 @@ public class Game {
 
         //The battle
         world1.room(1200, 1200);
-        world1.addObject(new Person("ally_pistol", world1.last.LL.add(new Vec2(1000, 1000)), 2.9 * Math.PI / 2));
-        world1.addObject(new Person("ally_pistol", world1.last.LL.add(new Vec2(300, 1000)), 3.1 * Math.PI / 2));
-        world1.addObject(new Person("ally_pistol", world1.last.LL.add(new Vec2(800, 800)), 2.9 * Math.PI / 2));
-        world1.addObject(new Person("ally_pistol", world1.last.LL.add(new Vec2(200, 700)), 3.2 * Math.PI / 2));
-        world1.addObject(new Person("ally_pistol", world1.last.LL.add(new Vec2(1000, 600)), 2.8 * Math.PI / 2));
+        world1.addObject(new Killable("ally_pistol", world1.last.LL.add(new Vec2(1000, 1000)), new Vec2(50), 2.9 * Math.PI / 2));
+        world1.addObject(new Killable("ally_pistol", world1.last.LL.add(new Vec2(300, 1000)), new Vec2(50), 3.1 * Math.PI / 2));
+        world1.addObject(new Killable("ally_pistol", world1.last.LL.add(new Vec2(800, 800)), new Vec2(50), 2.9 * Math.PI / 2));
+        world1.addObject(new Killable("ally_pistol", world1.last.LL.add(new Vec2(200, 700)), new Vec2(50), 3.2 * Math.PI / 2));
+        world1.addObject(new Killable("ally_pistol", world1.last.LL.add(new Vec2(1000, 600)), new Vec2(50), 2.8 * Math.PI / 2));
         Killable macdonwald = world1.addObject(new Killable("enemy_pistol", world1.last.LL.add(new Vec2(600, 100)), new Vec2(50), Math.PI / 2));
         Block MDblock = world1.block(new Vec2(600, 100), new Vec2(100));
         macdonwald.onDeath.onEvent(() -> {
@@ -105,7 +105,7 @@ public class Game {
         world1.room(600, 400);
 
         world1.room(600, 600); //Ross
-        Person ross = world1.addObject(new Person("ally", world1.last.LL.add(new Vec2(500, 300)), 0));
+        Killable ross = world1.addObject(new Killable("ally", world1.last.LL.add(new Vec2(500, 300)), new Vec2(50), 0));
         ross.rotation.set(Math.PI);
         world1.sound(300, "ross1.mp3");
         world1.event(300, () -> Core.timer(2.5, () -> Sounds.playSound("ross2.mp3")));
@@ -222,17 +222,22 @@ public class Game {
                 })));
 
         world2.event(900, () -> {
+            Sounds.playSound("banquo0.mp3");
             Core.timer(2, () -> {
                 dreamValue = .2;
+                Sounds.playSound("banquo1.mp3");
                 Person banquo = world2.addObject(new Person("banquo", feast.LL.add(new Vec2(500, 700)), Math.PI / 2));
                 banquo.shader = vision;
                 banquo.onUpdate(dt -> banquo.rotation.set(RegisteredEntity.get(Macbeth.class).get().position.get().subtract(banquo.position.get()).direction()));
                 food.forEach(e -> e.get("velocity", Vec2.class).set(Vec2.randomShell(500)));
-                Core.timer(5, () -> {
+                Core.timer(6, () -> Sounds.playSound("banquo2.mp3"));
+                Core.timer(10, () -> {
+                    Sounds.playSound("banquo3.mp3");
                     banquo.destroy();
                     dreamValue = 0;
                 });
             });
         });
+        world2.room(200, 1000);
     }
 }
